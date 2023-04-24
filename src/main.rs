@@ -2,15 +2,15 @@ use rand::Rng;
 
 #[derive(Debug)]
 struct Key {
-    x: u64,
-    y: u64,
+    x: i64,
+    y: i64,
 }
 
-fn generateSecrets(secret: u64) -> Vec<Key> {
+fn generate_seeds(secret: i64) -> Vec<Key> {
     let mut rng = rand::thread_rng();
-    let factor: u64 = rng.gen();
+    let factor: i64 = rng.gen_range(0..100);
     let mut shared_keys: Vec<Key> = Vec::new();
-    let mut i: u64 = 1;
+    let mut i: i64 = 1;
     loop {
         let temp_keys: Key = Key {
             x: i,
@@ -25,6 +25,21 @@ fn generateSecrets(secret: u64) -> Vec<Key> {
     return shared_keys;
 }
 
+fn recover_secret(seeds: Vec<Key>) -> i64 {
+    let l0 = (seeds[0].y * seeds[1].x) / (seeds[1].x - seeds[0].x);
+    let l1 = (seeds[1].y * seeds[0].x) / (seeds[0].x - seeds[1].x);
+
+    return l0 + l1;
+}
+
 fn main() {
-    print!("{:?}", generateSecrets(64));
+    let mut rng = rand::thread_rng();
+    let secret = rng.gen_range(1..100);
+    print!("secret: {}\n", secret);
+    let mut seeds: Vec<Key> = generate_seeds(secret);
+    seeds.remove(2);
+    seeds.remove(2);
+    let rec_secret: i64 = recover_secret(seeds);
+
+    print!("recovered secret: {}", rec_secret);
 }
